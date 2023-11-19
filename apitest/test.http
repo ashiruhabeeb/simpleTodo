@@ -1,1 +1,13 @@
-GET http://localhost:2524/healthcheck
+GET {{hostname}}/healthchecker
+
+###
+
+POST {{hostname}}/signup
+Content-Type: application/json
+
+{
+    "title": "grocery runs",
+    "description": "restock toiletries and kitchen restock from keflers stores by boulevard ave",
+    "start_at": "2023-11-19 19:15:00",
+    "end_at": "2023-11-19 20:30:00"
+}

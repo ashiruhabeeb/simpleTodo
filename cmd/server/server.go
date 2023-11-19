@@ -23,16 +23,14 @@ func(a * App) AppRun() error {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	logger.Info("app env variables successfully loaded")
+	logger.Info("✅ app env variables successfully loaded")
 
 	// start database
 	db, err := db.ConnectDB(os.Getenv("DB_DSN"))
 	if err != nil {
 		logger.Error(err.Error())
 	}
-
-	logger.Info("databse connection established")
-	defer db.Close()
+	logger.Info("✅ databse connection established")
 
 	// create app router
 	echo := echo.New()
@@ -43,7 +41,7 @@ func(a * App) AppRun() error {
 	port := os.Getenv("APP_PORT")
 
 	// setup app routes
-	router.SetupRoutes(echo, port)
+	router.SetupRoutes(echo, port, db)
 
 	return nil
 }

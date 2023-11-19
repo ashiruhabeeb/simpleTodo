@@ -2,20 +2,30 @@ package router
 
 import (
 	"context"
-	"log"
+	"database/sql"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/ashiruhabeeb/simpleTodoApp/handler"
+	"github.com/ashiruhabeeb/simpleTodoApp/logger"
+	"github.com/ashiruhabeeb/simpleTodoApp/repository"
 	"github.com/labstack/echo/v4"
 )
 
-func SetupRoutes(e *echo.Echo, port string) {
+func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	logger := logger.NewSlogHandler()
+
+	todoRepo := repository.NewTodoRepo(db)
+	todoHandler :=  handler.NewTodoService(todoRepo, logger)
+
+	e.POST("/signup", todoHandler.Store)
 
 	httpSrv := &http.Server{
 		Addr:           ":" + port,
@@ -27,10 +37,10 @@ func SetupRoutes(e *echo.Echo, port string) {
 	}
 
 	go func() {
-		log.Printf("[INIT] ✅ gin router running and listening on port %v", port)
+		logger.Info("[INIT] ✅ gin router running and listening on port")
 
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("[ERROR] http.ListenAndServe failure: %v\n", err)
+			logger.Error("[ERROR] http.ListenAndServe failure: %v\n", err)
 		}
 	}()
 
@@ -40,17 +50,17 @@ func SetupRoutes(e *echo.Echo, port string) {
 
 	// make blocking channel and waiting for a signal
 	<-quit
-	log.Println("[CLOSE] shutdown server ...")
+	logger.Warn("shutdown server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := httpSrv.Shutdown(ctx); err != nil {
-		log.Printf("[CLOSE] error when shutdown server: %s", err)
+		logger.Warn("[CLOSE] error when shutdown server: %s", err)
 	}
 
 	// catching ctx.Done(). timeout of 5 seconds.
 	<-ctx.Done()
-	log.Println("[CLOSE] timeout of 5 seconds.")
-	log.Println("[CLOSE] server exiting")
+	logger.Warn("[CLOSE] timeout of 5 seconds.")
+	logger.Warn("[CLOSE] server exiting")
 }

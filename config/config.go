@@ -23,6 +23,5 @@ func ENV() error {
 			return errThis
 		}
 	}
-
 	return nil
 }
