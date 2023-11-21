@@ -1,0 +1,16 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  run:
+    cmds:
+      - go run cmd/main.go
+    silent: true
+
+  apptidy:
+    decription: synchronizes the go.mod file with the actual dependencies used in the codebase
+    cmds:
+      - go mod tidy
+    silent: true
+    
