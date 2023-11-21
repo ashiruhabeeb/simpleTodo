@@ -1,7 +1,6 @@
-GET {{hostname}}/healthchecker
+GET {{hostname}}/healthcheck
 
 ###
-
 POST {{hostname}}/signup
 Content-Type: application/json
 
@@ -11,3 +10,26 @@ Content-Type: application/json
     "start_at": "2023-11-19 19:15:00",
     "end_at": "2023-11-19 20:30:00"
 }
+
+###
+GET {{hostname}}
+Content-Type: application/json
+
+###
+GET {{hostname}}/3
+Content-Type: application/json
+
+###
+PATCH {{hostname}}/2
+Content-Type: application/json
+
+{
+    "title": "study",
+    "description": "upcoming google interview",
+    "start_at": "2023-11-22 14:00:00",
+    "end_at": "2023-11-22 17:45:00"
+}
+
+###
+DELETE {{hostname}}/2
+Content-Type: application/json

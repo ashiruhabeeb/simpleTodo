@@ -20,13 +20,19 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	// initialize application logger
 	logger := logger.NewSlogHandler()
-
+	// database - router dependency injection 
 	todoRepo := repository.NewTodoRepo(db)
 	todoHandler :=  handler.NewTodoService(todoRepo, logger)
-
+	// router handlefunc
 	e.POST("/signup", todoHandler.Store)
+	e.GET("", todoHandler.GetTodos)
+	e.GET("/:todoid", todoHandler.GetTodo)
+	e.PATCH("/:todoid", todoHandler.UpdateTodo)
+	e.DELETE("/:todoid", todoHandler.DeleteTodo)
 
+	// server configuration
 	httpSrv := &http.Server{
 		Addr:           ":" + port,
 		Handler:        e,
@@ -44,6 +50,7 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 		}
 	}()
 
+	// Greceful shutdown
 	// declare a buffered channel that reveives unix signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
