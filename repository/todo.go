@@ -17,8 +17,8 @@ func NewTodoRepo(db *sql.DB) *todoRepo {
 	return &todoRepo{db: db}
 }
 
-// InsertUser creates a new user record in the users table
-func (tr *todoRepo) InsertUser(t entity.Todo) (int, error) {
+// InsertTodo creates a new todo record in the todo table
+func (tr *todoRepo) InsertTodo(t entity.Todo) (int, error) {
 	err := tr.db.QueryRow(insertTodo, t.Title, t.Description, t.StartAt, t.EndAt).Scan(&t.TodoID)
 	if err != nil {
 		return 0, fmt.Errorf(err.Error())

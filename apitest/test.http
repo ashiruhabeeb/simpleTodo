@@ -1,7 +1,7 @@
 GET {{hostname}}/healthcheck
 
 ###
-POST {{hostname}}/todo/signup
+POST {{hostname}}/todo/add
 Content-Type: application/json
 
 {

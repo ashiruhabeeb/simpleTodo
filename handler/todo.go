@@ -18,6 +18,7 @@ type todoController struct {
 
 func NewTodoService(repo repository.TodoRepo, log slog.Logger) todoController {
 	logger := logger.NewSlogHandler()
+	
 	return todoController{repo: repo, log: logger}
 }
 
@@ -36,7 +37,7 @@ func(td *todoController) Store(e echo.Context) error {
 
 	todo := todorequest.ToEntity()
 
-	todoId, err := td.repo.InsertUser(*todo)
+	todoId, err := td.repo.InsertTodo(*todo)
 	if err != nil {
 		td.log.Error(err.Error())
 		return echo.NewHTTPError(500, err.Error())

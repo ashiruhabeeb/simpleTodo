@@ -23,22 +23,29 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 
 	// initialize application logger
 	logger := logger.NewSlogHandler()
-	// database - router dependency injection 
+
+	// TODO: database - router dependency injection 
 	todoRepo := repository.NewTodoRepo(db)
-	todoHandler :=  handler.NewTodoService(todoRepo, logger)
+	todoController :=  handler.NewTodoService(todoRepo, logger)
+
+	// USER: database - router dependency injection
+	userRepo := repository.NewUserRepo(db)
+	userController := handler.NewUserController(userRepo, logger)
 	
 	// auth routes
+	auth := e.Group("/api/user")
+	auth.POST("/signup", userController.SignUp)
 
 	// protected routes
 	todo := e.Group("/todo")
 	todo.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey: []byte(os.Getenv("ACCESS_TOKEN_KEY")),
 	}))
-	todo.POST("/signup", todoHandler.Store)
-	todo.GET("", todoHandler.GetTodos)
-	todo.GET("/:todoid", todoHandler.GetTodo)
-	todo.PATCH("/:todoid", todoHandler.UpdateTodo)
-	todo.DELETE("/:todoid", todoHandler.DeleteTodo)
+	todo.POST("/add", todoController.Store)
+	todo.GET("", todoController.GetTodos)
+	todo.GET("/:todoid", todoController.GetTodo)
+	todo.PATCH("/:todoid", todoController.UpdateTodo)
+	todo.DELETE("/:todoid", todoController.DeleteTodo)
 
 	// server configuration
 	httpSrv := &http.Server{
