@@ -8,7 +8,6 @@ import (
 	"github.com/ashiruhabeeb/simpleTodoApp/handler/request"
 	"github.com/ashiruhabeeb/simpleTodoApp/logger"
 	"github.com/ashiruhabeeb/simpleTodoApp/repository"
-	"github.com/ashiruhabeeb/simpleTodoApp/validator"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,9 +29,9 @@ func(td *todoController) Store(e echo.Context) error {
 		return echo.NewHTTPError(400, err.Error())
 	}
 	
-	if err := validator.Validate(todorequest); err != nil {
-		td.log.Warn(err.Error())
-		return echo.NewHTTPError(400, err.Error())
+	if errValidate := e.Validate(todorequest); errValidate != nil {
+		td.log.Warn(errValidate.Error())
+		return echo.NewHTTPError(400, errValidate.Error())
 	}
 
 	todo := todorequest.ToEntity()
@@ -95,9 +94,9 @@ func (td *todoController) UpdateTodo(e echo.Context) error {
 		return echo.NewHTTPError(400, err.Error())
 	}
 
-	if err := validator.Validate(payload); err != nil {
-		td.log.Warn(err.Error())
-		return echo.NewHTTPError(400, err.Error())
+	if errValidate := e.Validate(payload); errValidate != nil {
+		td.log.Warn(errValidate.Error())
+		return echo.NewHTTPError(400, errValidate.Error())
 	}
 
 	if err = td.repo.UpdateTodo(todo_id, payload.Title, payload.Description, payload.Start_at, payload.End_At); err != nil {

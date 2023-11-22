@@ -1,22 +1,22 @@
 GET {{hostname}}/healthcheck
 
 ###
-POST {{hostname}}/signup
+POST {{hostname}}/todo/signup
 Content-Type: application/json
 
 {
-    "title": "grocery runs",
-    "description": "restock toiletries and kitchen restock from keflers stores by boulevard ave",
-    "start_at": "2023-11-19 19:15:00",
-    "end_at": "2023-11-19 20:30:00"
+    "title": "Ford interview",
+    "description": "scheduled final stage interview for bentley inc",
+    "start_at": "2023-12-20 13:00:00",
+    "end_at": "2023-12-20 13:30:00"
 }
 
 ###
-GET {{hostname}}
+GET {{hostname}}/todo
 Content-Type: application/json
 
 ###
-GET {{hostname}}/3
+GET {{hostname}}/todo/4
 Content-Type: application/json
 
 ###
