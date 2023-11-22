@@ -1,3 +1,6 @@
+-- Set timezone
+set timezone = "Africa/Lagos";
+
 -- Table: todo
 create table if not exists todo (
     todo_id serial not null,
@@ -10,3 +13,6 @@ create table if not exists todo (
 );
 
 alter table todo alter column completed set default false;
+
+-- Add indexes
+create index active_todo on todo (title) where completed = true;
