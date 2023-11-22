@@ -12,6 +12,7 @@ import (
 	"github.com/ashiruhabeeb/simpleTodoApp/handler"
 	"github.com/ashiruhabeeb/simpleTodoApp/logger"
 	"github.com/ashiruhabeeb/simpleTodoApp/repository"
+	"github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,15 +23,29 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 
 	// initialize application logger
 	logger := logger.NewSlogHandler()
-	// database - router dependency injection 
+
+	// TODO: database - router dependency injection 
 	todoRepo := repository.NewTodoRepo(db)
-	todoHandler :=  handler.NewTodoService(todoRepo, logger)
-	// router handlefunc
-	e.POST("/signup", todoHandler.Store)
-	e.GET("", todoHandler.GetTodos)
-	e.GET("/:todoid", todoHandler.GetTodo)
-	e.PATCH("/:todoid", todoHandler.UpdateTodo)
-	e.DELETE("/:todoid", todoHandler.DeleteTodo)
+	todoController :=  handler.NewTodoService(todoRepo, logger)
+
+	// USER: database - router dependency injection
+	userRepo := repository.NewUserRepo(db)
+	userController := handler.NewUserController(userRepo, logger)
+	
+	// auth routes
+	auth := e.Group("/api/user")
+	auth.POST("/signup", userController.SignUp)
+
+	// protected routes
+	todo := e.Group("/todo")
+	todo.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(os.Getenv("ACCESS_TOKEN_KEY")),
+	}))
+	todo.POST("/add", todoController.Store)
+	todo.GET("", todoController.GetTodos)
+	todo.GET("/:todoid", todoController.GetTodo)
+	todo.PATCH("/:todoid", todoController.UpdateTodo)
+	todo.DELETE("/:todoid", todoController.DeleteTodo)
 
 	// server configuration
 	httpSrv := &http.Server{

@@ -8,7 +8,6 @@ import (
 	"github.com/ashiruhabeeb/simpleTodoApp/handler/request"
 	"github.com/ashiruhabeeb/simpleTodoApp/logger"
 	"github.com/ashiruhabeeb/simpleTodoApp/repository"
-	"github.com/ashiruhabeeb/simpleTodoApp/validator"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,6 +18,7 @@ type todoController struct {
 
 func NewTodoService(repo repository.TodoRepo, log slog.Logger) todoController {
 	logger := logger.NewSlogHandler()
+	
 	return todoController{repo: repo, log: logger}
 }
 
@@ -30,14 +30,14 @@ func(td *todoController) Store(e echo.Context) error {
 		return echo.NewHTTPError(400, err.Error())
 	}
 	
-	if err := validator.Validate(todorequest); err != nil {
-		td.log.Warn(err.Error())
-		return echo.NewHTTPError(400, err.Error())
+	if errValidate := e.Validate(todorequest); errValidate != nil {
+		td.log.Warn(errValidate.Error())
+		return echo.NewHTTPError(400, errValidate.Error())
 	}
 
 	todo := todorequest.ToEntity()
 
-	todoId, err := td.repo.InsertUser(*todo)
+	todoId, err := td.repo.InsertTodo(*todo)
 	if err != nil {
 		td.log.Error(err.Error())
 		return echo.NewHTTPError(500, err.Error())
@@ -95,9 +95,9 @@ func (td *todoController) UpdateTodo(e echo.Context) error {
 		return echo.NewHTTPError(400, err.Error())
 	}
 
-	if err := validator.Validate(payload); err != nil {
-		td.log.Warn(err.Error())
-		return echo.NewHTTPError(400, err.Error())
+	if errValidate := e.Validate(payload); errValidate != nil {
+		td.log.Warn(errValidate.Error())
+		return echo.NewHTTPError(400, errValidate.Error())
 	}
 
 	if err = td.repo.UpdateTodo(todo_id, payload.Title, payload.Description, payload.Start_at, payload.End_At); err != nil {
