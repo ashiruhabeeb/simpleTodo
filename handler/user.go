@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"time"
@@ -60,6 +61,12 @@ func (uc *userController) SignUp(e echo.Context) error {
 		return HandlerError(e, 500, err)
 	}
 
+	_, err = utils.TwilioSendOTP(payload.Phone)
+	if err != nil {
+		uc.log.Warn(err.Error())
+		return HandlerError(e, 500, err)
+	}
+
 	entity := &entity.User{
 		Username:  payload.Username,
 		FullName:  payload.FullName,
@@ -108,4 +115,31 @@ func (uc *userController) SignUp(e echo.Context) error {
 	})
 
 	return e.JSON(201, id)
+}
+
+func(uc *userController) VerifySMS(e echo.Context) error {
+	const appTimeout = time.Second * 10
+
+	_, cancel := context.WithTimeout(context.Background(), appTimeout)	
+	defer cancel()
+
+	var payload utils.VerifyData
+
+	if err := e.Bind(&payload); err != nil {
+		uc.log.Error(err.Error())
+		return HandlerError(e, 400, err)
+	}
+
+	data := utils.VerifyData{
+		User: payload.User,
+		Code: payload.Code,
+	}
+
+	err := utils.TwilioVerifyOTP(data.User.PhoneNumber, data.Code)
+	if err != nil {
+		uc.log.Error("twilio otp verification failed", err)
+		return HandlerError(e, 400, err)
+	}
+
+	return e.JSON(200, "OTP verified successfully")
 }

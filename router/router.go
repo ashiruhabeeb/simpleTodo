@@ -31,7 +31,7 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 	todoController :=  handler.NewTodoService(todoRepo, logger)
 
 	// USER: database - router dependency injection
-	tk, err := token.NewJWTMaker(config.GetENV(""))
+	tk, err := token.NewJWTMaker(config.GetENV("JWT_TOKEN_KEY"))
 	if err != nil {
 		logger.Error("token secret key fetch failure: %v", err)
 		panic(err)
