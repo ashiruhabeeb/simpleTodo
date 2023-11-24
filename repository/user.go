@@ -19,20 +19,36 @@ func NewUserRepo(db *sql.DB) *userRepo {
 
 // InsertUser creates a new user record in the users table
 func (ur *userRepo) InsertUser(u entity.User)(int, error){
-	err := ur.db.QueryRow(insertuser, u.Username, u.FullName, u.Email, u.Password, u.Address, u.Avatar, u.DOB).Scan(&u.UserID)
+	err := ur.db.QueryRow(insertuser, u.Username, u.FullName, u.Email, u.Password, u.Phone, u.Address, u.Avatar, u.DOB).Scan(&u.UserID)
 	if err != nil {
 		return 0, fmt.Errorf(err.Error())
 	}
 	return u.UserID, nil
 }
 
-// GetUser fetch a single user record from the users table 
-func (ur *userRepo) GetUser(user_id int)(*entity.User, error){
+// GetUserById fetch a single user record from the users table 
+func (ur *userRepo) GetUserById(user_id int)(*entity.User, error){
 	user := entity.User{}
 
 	row := ur.db.QueryRow(getUser, user_id)
 
-	err := row.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Phone, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == row.Err() {
+			return nil, err
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByEmail fetch a single user record from the users table 
+func (ur *userRepo) GetUserByEmail(email string)(*entity.User, error){
+	user := entity.User{}
+
+	row := ur.db.QueryRow(getUserByEmail, email)
+
+	err := row.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Phone, &user.Password, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == row.Err() {
 			return nil, err
@@ -53,7 +69,7 @@ func (ur *userRepo) GetUsers()([]entity.User, error){
 	users := []entity.User{}
 	for rows.Next() {
 		var user entity.User
-		rows.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
+		rows.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Phone, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -63,8 +79,8 @@ func (ur *userRepo) GetUsers()([]entity.User, error){
 }
 
 // UpdateTodo updates a single todo record in the todo table
-func (ur *userRepo) UpdateUser(user_id int, username, fullname, address, dob string) error {
-	_, err := ur.db.Exec(updateUser, username, fullname, address, dob)
+func (ur *userRepo) UpdateUser(user_id int, username, fullname, address, phone, dob string) error {
+	_, err := ur.db.Exec(updateUser, username, fullname, address, phone, dob)
 	if err != nil {
 		return err
 	}

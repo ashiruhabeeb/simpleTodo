@@ -18,3 +18,7 @@ func ENV() error {
 	}
 	return nil
 }
+
+func GetENV(key string) string {
+	return os.Getenv(key)
+}
