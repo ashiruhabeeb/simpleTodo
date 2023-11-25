@@ -14,8 +14,9 @@ type TodoRepo interface {
 // Implements userRepo methods
 type UserRepo interface {
 	InsertUser(u entity.User)(int, error)
-	GetUser(user_id int)(*entity.User, error)
+	GetUserById(user_id int)(*entity.User, error)
+	GetUserByEmail(email string)(*entity.User, error)
 	GetUsers()([]entity.User, error)
-	UpdateUser(user_id int, username, fullname, address, dob string) error
+	UpdateUser(user_id int, username, fullname, address, phone, dob string) error
 	DeleteUser(user_id int) error
 }

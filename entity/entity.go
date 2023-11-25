@@ -16,6 +16,7 @@ type User struct {
 	FullName	string	`json:"full_name"`
 	Email		string	`json:"e-mail"`
 	Password	string	`json:"password"`
+	Phone		string	`json:"phone"`
 	Address		[]Address	`json:"address"`
 	Avatar		string	`json:"avatar"`
 	DOB			string	`json:"dob"`

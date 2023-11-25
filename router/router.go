@@ -9,9 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ashiruhabeeb/simpleTodoApp/config"
 	"github.com/ashiruhabeeb/simpleTodoApp/handler"
 	"github.com/ashiruhabeeb/simpleTodoApp/logger"
 	"github.com/ashiruhabeeb/simpleTodoApp/repository"
+	"github.com/ashiruhabeeb/simpleTodoApp/token"
 	"github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -29,8 +31,14 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 	todoController :=  handler.NewTodoService(todoRepo, logger)
 
 	// USER: database - router dependency injection
+	tk, err := token.NewJWTMaker(config.GetENV("JWT_TOKEN_KEY"))
+	if err != nil {
+		logger.Error("token secret key fetch failure: %v", err)
+		panic(err)
+	}
+
 	userRepo := repository.NewUserRepo(db)
-	userController := handler.NewUserController(userRepo, logger)
+	userController := handler.NewUserController(userRepo, logger, tk)
 	
 	// auth routes
 	auth := e.Group("/api/user")

@@ -17,8 +17,11 @@ require (
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/labstack/echo-jwt/v4 v4.2.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/twilio/twilio-go v1.15.2 // indirect
 	golang.org/x/time v0.3.0 // indirect
 )
 

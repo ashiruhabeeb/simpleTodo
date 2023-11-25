@@ -6,6 +6,6 @@ type CustomValidator struct {
 	Validator *validator.Validate
 }
 
-func(cv *CustomValidator) Validate(i interface{}) error {
+func(cv *CustomValidator) Validate(i any) error {
 	return validator.New().Struct(i)
 }
