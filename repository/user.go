@@ -19,7 +19,7 @@ func NewUserRepo(db *sql.DB) *userRepo {
 
 // InsertUser creates a new user record in the users table
 func (ur *userRepo) InsertUser(u entity.User)(int, error){
-	err := ur.db.QueryRow(insertuser, u.Username, u.FullName, u.Email, u.Password, u.Phone, u.Address, u.Avatar, u.DOB).Scan(&u.UserID)
+	err := ur.db.QueryRow(insertuser, u.Username, u.FullName, u.Email, u.Password, u.Phone).Scan(&u.UserID)
 	if err != nil {
 		return 0, fmt.Errorf(err.Error())
 	}
@@ -49,6 +49,22 @@ func (ur *userRepo) GetUserByEmail(email string)(*entity.User, error){
 	row := ur.db.QueryRow(getUserByEmail, email)
 
 	err := row.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Phone, &user.Password, &user.Address, &user.Avatar, &user.DOB, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == row.Err() {
+			return nil, err
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByPhone fetch a single user record from the users table 
+func (ur *userRepo) GetUserByPhone(phone string)(*entity.User, error){
+	user := entity.User{}
+
+	row := ur.db.QueryRow(getUserByPhone, phone)
+
+	err := row.Scan(&user.UserID, &user.Username, &user.FullName, &user.Email, &user.Phone, &user.CreatedAt)
 	if err != nil {
 		if err == row.Err() {
 			return nil, err

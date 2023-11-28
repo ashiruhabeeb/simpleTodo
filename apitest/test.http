@@ -33,3 +33,27 @@ Content-Type: application/json
 ###
 DELETE {{hostname}}/2
 Content-Type: application/json
+
+###
+POST {{hostname}}/api/user/signup
+Content-Type: application/json
+
+{
+    "username": "bebo",
+    "fullname": "ashiru habeeb adewale",
+    "e-mail": "ashiruhabeeb@gmail.com",
+    "password": "sonybRavia92P",
+    "confirm_password": "sonybRavia92P",
+    "phone": "+2347059254137"
+}
+
+###
+POST {{hostname}}/api/user/signup/verifyotp
+Content-Type: application/json
+
+{
+    "user": {
+        "phoneNumber": "+2347059254137"
+    },
+    "code": "828962"
+}
