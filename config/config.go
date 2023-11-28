@@ -20,5 +20,10 @@ func ENV() error {
 }
 
 func GetENV(key string) string {
+	err1 := godotenv.Load()
+	if err1 != nil {
+		return err1.Error()
+	}
+	
 	return os.Getenv(key)
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"net/http"
 	"time"
@@ -28,11 +29,24 @@ func NewUserController(repo repository.UserRepo, log slog.Logger, token token.To
 	return userController{repo: repo, log: logger, token: token}
 }
 
+// GetUserByPhone fetches a single record from users table asociated with the phone number as parameter
+func (uc *userController) GetUserByPhone(e echo.Context) error {
+	phone := e.Param("phone")
+
+	entity, err := uc.repo.GetUserByPhone(phone)
+	if err != nil {
+		uc.log.Error("get user by phone failure: %v", err)
+		return echo.NewHTTPError(500, err)
+	}
+
+	return e.JSON(200, entity)
+}
+
 // SignUp creates a new user record in the users table
 func (uc *userController) SignUp(e echo.Context) error {
 	var payload struct {
-		Username		string	`json:"username" validate:"required;min=2,max=225"`
-		FullName		string	`json:"fullname" validate:"required;min=2,max=225"`
+		Username		string	`json:"username" validate:"min=2,max=225"`
+		FullName		string	`json:"fullname" validate:"min=2,max=225"`
 		Email			string	`json:"e-mail" validate:"required,email"`
 		Password		string	`json:"password" validate:"required,min=8"`
 		ConfirmPasword	string	`json:"confirm_password" validate:"required"`
@@ -76,10 +90,43 @@ func (uc *userController) SignUp(e echo.Context) error {
 		CreatedAt: time.Now().Local().String(),
 	}
 
-	id, err := uc.repo.InsertUser(*entity)
+	_, err = uc.repo.InsertUser(*entity)
 	if err != nil {
-		uc.log.Error("user create failure: %v", err)
+		log.Panic(err)
+		return e.JSON(500, err)
+	}
+	
+	return e.JSON(201, "Go to /signup/otpvalidate")
+}
+
+func(uc *userController) VerifySMS(e echo.Context) error {
+	const appTimeout = time.Second * 60
+
+	_, cancel := context.WithTimeout(context.Background(), appTimeout)	
+	defer cancel()
+
+	var payload utils.VerifyData
+
+	if err := e.Bind(&payload); err != nil {
+		uc.log.Error("otp payload bind error: %v", err)
+		return HandlerError(e, 400, err)
+	}
+
+	data := utils.VerifyData{
+		User: payload.User,
+		Code: payload.Code,
+	}
+
+	entity, err := uc.repo.GetUserByPhone(data.User.PhoneNumber)
+	if err != nil {
+		uc.log.Error("user does not exist", err)
 		return HandlerError(e, 500, err)
+	}
+
+	err = utils.TwilioVerifyOTP(data.User.PhoneNumber, data.Code)
+	if err != nil {
+		uc.log.Error("twilio otp verification failed", err)
+		return HandlerError(e, 400, err)
 	}
 
 	accesToken, _, err := uc.token.GenerateAccessToken(entity.Username, time.Minute * 20)
@@ -101,7 +148,7 @@ func (uc *userController) SignUp(e echo.Context) error {
 		MaxAge:     int(time.Now().Add(time.Minute * 20).Unix()),
 		Secure:     true,
 		HttpOnly:   true,
-		SameSite:   http.SameSiteDefaultMode,
+		SameSite:   http.SameSiteLaxMode,
 	})
 
 	e.SetCookie(&http.Cookie{
@@ -111,35 +158,8 @@ func (uc *userController) SignUp(e echo.Context) error {
 		MaxAge:     int(time.Now().Add(time.Hour * 24 * 7 * 51).Unix()),
 		Secure:     true,
 		HttpOnly:   true,
-		SameSite:   http.SameSiteDefaultMode,
+		SameSite:   http.SameSiteLaxMode,
 	})
 
-	return e.JSON(201, id)
-}
-
-func(uc *userController) VerifySMS(e echo.Context) error {
-	const appTimeout = time.Second * 10
-
-	_, cancel := context.WithTimeout(context.Background(), appTimeout)	
-	defer cancel()
-
-	var payload utils.VerifyData
-
-	if err := e.Bind(&payload); err != nil {
-		uc.log.Error(err.Error())
-		return HandlerError(e, 400, err)
-	}
-
-	data := utils.VerifyData{
-		User: payload.User,
-		Code: payload.Code,
-	}
-
-	err := utils.TwilioVerifyOTP(data.User.PhoneNumber, data.Code)
-	if err != nil {
-		uc.log.Error("twilio otp verification failed", err)
-		return HandlerError(e, 400, err)
-	}
-
-	return e.JSON(200, "OTP verified successfully")
+	return e.JSON(200, "new user registered successfully")
 }

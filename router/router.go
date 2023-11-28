@@ -43,6 +43,7 @@ func SetupRoutes(e *echo.Echo, port string, db *sql.DB) {
 	// auth routes
 	auth := e.Group("/api/user")
 	auth.POST("/signup", userController.SignUp)
+	auth.POST("/signup/verifyotp", userController.VerifySMS)
 
 	// protected routes
 	todo := e.Group("/todo")

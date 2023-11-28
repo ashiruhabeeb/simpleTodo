@@ -11,17 +11,17 @@ type Todo struct {
 }
 
 type User struct {
-	UserID		int		`json:"user_id"`
+	UserID		int		`json:"user_id,omitempty"`
 	Username	string	`json:"user_name"`
 	FullName	string	`json:"full_name"`
 	Email		string	`json:"e-mail"`
 	Password	string	`json:"password"`
 	Phone		string	`json:"phone"`
-	Address		[]Address	`json:"address"`
-	Avatar		string	`json:"avatar"`
-	DOB			string	`json:"dob"`
+	Address		[]Address	`json:"address,omitempty"`
+	Avatar		string	`json:"avatar,omitempty"`
+	DOB			string	`json:"dob,omitempty"`
 	CreatedAt	string	`json:"created_at"`
-	UpdatedAt	string	`json:"updated_at"`
+	UpdatedAt	string	`json:"updated_at,omitempty"`
 }
 
 type Address struct {

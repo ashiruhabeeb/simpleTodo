@@ -16,6 +16,7 @@ type UserRepo interface {
 	InsertUser(u entity.User)(int, error)
 	GetUserById(user_id int)(*entity.User, error)
 	GetUserByEmail(email string)(*entity.User, error)
+	GetUserByPhone(phone string)(*entity.User, error)
 	GetUsers()([]entity.User, error)
 	UpdateUser(user_id int, username, fullname, address, phone, dob string) error
 	DeleteUser(user_id int) error

@@ -8,7 +8,7 @@ create table if not exists users (
     fullname varchar(225) not null,
     email varchar(225) unique not null,
     password varchar(225) not null,
-    phone varchar(225) unique not null
+    phone varchar(225) unique not null,
     address_id serial,
     house_number int,
     street_name varchar(225),
@@ -16,7 +16,7 @@ create table if not exists users (
     state varchar(225),
     country varchar(225),
     avatar varchar(225),
-    dob date not null,
+    dob date,
     created_at timestamptz not null,
     updated_at timestamptz not null,
     primary key(user_id)
